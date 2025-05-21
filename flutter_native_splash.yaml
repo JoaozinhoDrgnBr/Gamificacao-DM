@@ -1,0 +1,37 @@
+flutter_native_splash:
+  # Background color da splash screen
+  color: "#121212"
+  
+  # Você também pode usar uma imagem de fundo
+  #background_image: "assets/images/splash_background.png"
+  
+  # Imagem do centro da splash screen
+  image: assets/images/splash_logo.png
+  
+  # Opcionalmente adicionar branding text
+  branding: assets/images/branding.png
+  branding_mode: bottom
+  
+  # Para personalizar a splash em modo escuro
+  color_dark: "#000000"
+  image_dark: assets/images/splash_logo.png
+  branding_dark: assets/images/branding.png
+  
+  # Configuração para Android 12+
+  android_12:
+    image: assets/images/splash_logo.png
+    icon_background_color: "#121212"
+    image_dark: assets/images/splash_logo.png
+    icon_background_color_dark: "#000000"
+  
+  # Web
+  web: false
+  
+  # Configuração para iOS
+  ios: true
+  ios_content_mode: center
+  
+  # Configuração para Android
+  android: true
+  android_gravity: center
+  fullscreen: true
