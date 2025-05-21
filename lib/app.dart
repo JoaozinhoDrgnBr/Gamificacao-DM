@@ -1,5 +1,6 @@
 import 'package:atividade4/screens/home/home_screen.dart';
 import 'package:atividade4/screens/login/login_screen.dart';
+import 'package:atividade4/screens/register/register_screen.dart';
 import 'package:atividade4/shared/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,8 +28,9 @@ class MyApp extends StatelessWidget {
             ),
         '/onboarding':
             (context) => const OnboardingScreen(loginRoute: '/login'),
-        '/login': (context) => LoginScreen(),
-        '/home': (context) => HomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }

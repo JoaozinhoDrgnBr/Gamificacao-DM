@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/services/auth_service.dart';
 
 class LoginController {
   final emailController = TextEditingController();
@@ -11,25 +12,47 @@ class LoginController {
     return formKey.currentState?.validate() ?? false;
   }
 
-  /// Simula o processo de login (substitua por autenticação real)
+  /// Processo de login utilizando o AuthService
   Future<void> login(BuildContext context) async {
     if (!validateForm()) return;
 
     final email = emailController.text.trim();
     final password = passwordController.text;
 
-    // Simulação de autenticação
-    if (email == 'teste@exemplo.com' && password == '123456') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login realizado com sucesso!')),
-      );
-      await Future.delayed(const Duration(seconds: 2));
-      Navigator.of(context).pushReplacementNamed('/home');
+    // Mostrar indicador de carregamento
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
 
-      // TODO: Navegação para próxima tela
-    } else {
+    try {
+      // Fazer login usando o serviço de autenticação
+      final success = await AuthService.login(
+        email: email,
+        password: password,
+      );
+
+      // Fechar indicador de carregamento
+      Navigator.of(context).pop();
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login realizado com sucesso!')),
+        );
+        await Future.delayed(const Duration(seconds: 1));
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('E-mail ou senha inválidos.')),
+        );
+      }
+    } catch (e) {
+      // Fechar indicador de carregamento
+      Navigator.of(context).pop();
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('E-mail ou senha inválidos.')),
+        SnackBar(content: Text('Erro ao fazer login: ${e.toString()}')),
       );
     }
   }
