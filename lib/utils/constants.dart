@@ -77,4 +77,15 @@ class AppStrings {
   static const String onboardingSubtitle = 'Explorando a praticidade dos Flutter Gems para criar apps incríveis';
   static const String homeTitle = 'Flutter Gems';
   static const String getStarted = 'Começar';
+  
+  // Strings de autenticação
+  static const String login = 'Entrar';
+  static const String register = 'Cadastrar';
+  static const String forgotPassword = 'Esqueceu a senha?';
+  static const String emailHint = 'Digite seu email';
+  static const String passwordHint = 'Digite sua senha';
+  static const String confirmPasswordHint = 'Confirme sua senha';
+  static const String recoverPassword = 'Recuperar Senha';
+  static const String recoverPasswordDescription = 'Digite seu email para receber instruções de recuperação';
+  static const String recoverPasswordSuccess = 'Email de recuperação enviado com sucesso!';
 }

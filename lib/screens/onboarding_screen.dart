@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/constants.dart';
 import '../widgets/custom_button.dart';
-import 'home_screen.dart';
+import 'login_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -47,11 +47,11 @@ class OnboardingScreen extends StatelessWidget {
               
               const Spacer(),
               
-              // Botão de ação
+              // Botão de ação (atualizado para ir para a tela de login)
               CustomButton(
                 text: AppStrings.getStarted,
                 onPressed: () => Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                 ),
                 icon: Icons.arrow_forward,
               ),
