@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../utils/constants.dart';
 import '../widgets/custom_button.dart';
+import 'home_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -50,7 +50,9 @@ class OnboardingScreen extends StatelessWidget {
               // Botão de ação
               CustomButton(
                 text: AppStrings.getStarted,
-                onPressed: () => context.go('/home'),
+                onPressed: () => Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                ),
                 icon: Icons.arrow_forward,
               ),
             ],
