@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.atividade4"
+    namespace = "com.example.gamificacao_dm"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.atividade4"
+        applicationId = "com.example.gamificacao_dm"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
