@@ -1,12 +1,92 @@
-// Passo 1: Adicione os pacotes ao seu pubspec.yaml
-// dependencies:
-//   flutter_advanced_drawer: ^1.3.5
-//   native_scaffold: ^1.0.0
 
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:native_scaffold/native_scaffold.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:animations/animations.dart';
 
+// Classe principal do App com Bottom Navigation
+class MainApp extends StatefulWidget {
+  const MainApp({Key? key}) : super(key: key);
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  late PersistentTabController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PersistentTabController(initialIndex: 0);
+  }
+
+  List<Widget> _buildScreens() {
+    return [
+      const HomeScreen(),
+      const PlaceholderScreen(title: 'Favoritos'),
+      const PlaceholderScreen(title: 'Configurações'),
+    ];
+  }
+
+  List<PersistentBottomNavBarItem> _navBarsItems() {
+    return [
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.home),
+        title: "Home",
+        activeColorPrimary: Colors.blue,
+        inactiveColorPrimary: Colors.grey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.favorite),
+        title: "Favoritos",
+        activeColorPrimary: Colors.red,
+        inactiveColorPrimary: Colors.grey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.settings),
+        title: "Config",
+        activeColorPrimary: Colors.green,
+        inactiveColorPrimary: Colors.grey,
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PersistentTabView(
+      context,
+      controller: _controller,
+      screens: _buildScreens(),
+      items: _navBarsItems(),
+      confineInSafeArea: true,
+      backgroundColor: Colors.white,
+      handleAndroidBackButtonPress: true,
+      resizeToAvoidBottomInset: true,
+      stateManagement: true,
+      hideNavigationBarWhenKeyboardShows: true,
+      decoration: NavBarDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        colorBehindNavBar: Colors.white,
+      ),
+      popAllScreensOnTapOfSelectedTab: true,
+      popActionScreens: PopActionScreensType.all,
+      itemAnimationProperties: const ItemAnimationProperties(
+        duration: Duration(milliseconds: 200),
+        curve: Curves.ease,
+      ),
+      screenTransitionAnimation: const ScreenTransitionAnimation(
+        animateTabTransition: true,
+        curve: Curves.ease,
+        duration: Duration(milliseconds: 200),
+      ),
+      navBarStyle: NavBarStyle.style15, // Estilo com ícone central destacado
+    );
+  }
+}
+
+// Home Screen com Drawer
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -214,5 +294,111 @@ class _HomeScreenState extends State<HomeScreen> {
   void _handleMenuButtonPressed() {
     // Controla a abertura e fechamento da drawer
     _advancedDrawerController.showDrawer();
+  }
+}
+
+// Tela de placeholder para outras abas
+class PlaceholderScreen extends StatelessWidget {
+  final String title;
+  
+  const PlaceholderScreen({Key? key, required this.title}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        automaticallyImplyLeading: false,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              title == 'Favoritos' ? Icons.favorite : Icons.settings,
+              size: 100,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Tela de detalhes do pacote com animação de fade
+class PackageDetailScreen extends StatelessWidget {
+  final String packageName;
+  
+  const PackageDetailScreen({Key? key, required this.packageName}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(packageName),
+      ),
+      body: FadeTransition(
+        opacity: const AlwaysStoppedAnimation(1.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.extension,
+                      size: 80,
+                      color: Colors.blue.shade600,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      packageName,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Descrição',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Este é o pacote $packageName. Aqui você pode ver mais detalhes sobre este pacote Flutter.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
