@@ -1,7 +1,5 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
-import 'package:native_scaffold/native_scaffold.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:animations/animations.dart';
 
@@ -19,13 +17,13 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    _controller = PersistentTabController(initialIndex: 0);
+    _controller = PersistentTabController(initialIndex: 1); // Inicia no centro (Home)
   }
 
   List<Widget> _buildScreens() {
     return [
-      const HomeScreen(),
       const PlaceholderScreen(title: 'Favoritos'),
+      const HomeScreen(), // Tela Home no centro
       const PlaceholderScreen(title: 'Configurações'),
     ];
   }
@@ -33,22 +31,40 @@ class _MainAppState extends State<MainApp> {
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
       PersistentBottomNavBarItem(
-        icon: const Icon(Icons.home),
-        title: "Home",
-        activeColorPrimary: Colors.blue,
-        inactiveColorPrimary: Colors.grey,
-      ),
-      PersistentBottomNavBarItem(
         icon: const Icon(Icons.favorite),
         title: "Favoritos",
-        activeColorPrimary: Colors.red,
-        inactiveColorPrimary: Colors.grey,
+        activeColorPrimary: Colors.red.shade600,
+        inactiveColorPrimary: Colors.grey.shade400,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade600,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.shade300,
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.home,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+        title: "Home",
+        activeColorPrimary: Colors.blue.shade600,
+        inactiveColorPrimary: Colors.blue.shade600,
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.settings),
         title: "Config",
-        activeColorPrimary: Colors.green,
-        inactiveColorPrimary: Colors.grey,
+        activeColorPrimary: Colors.green.shade600,
+        inactiveColorPrimary: Colors.grey.shade400,
       ),
     ];
   }
@@ -67,21 +83,28 @@ class _MainAppState extends State<MainApp> {
       stateManagement: true,
       hideNavigationBarWhenKeyboardShows: true,
       decoration: NavBarDecoration(
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(16.0),
         colorBehindNavBar: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300,
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       popAllScreensOnTapOfSelectedTab: true,
       popActionScreens: PopActionScreensType.all,
       itemAnimationProperties: const ItemAnimationProperties(
-        duration: Duration(milliseconds: 200),
-        curve: Curves.ease,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
       ),
       screenTransitionAnimation: const ScreenTransitionAnimation(
         animateTabTransition: true,
-        curve: Curves.ease,
-        duration: Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        duration: Duration(milliseconds: 400),
       ),
-      navBarStyle: NavBarStyle.style15, // Estilo com ícone central destacado
+      navBarStyle: NavBarStyle.style13, // Melhor estilo para ícone central destacado
     );
   }
 }
@@ -94,9 +117,13 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Controlador para a drawer
   final _advancedDrawerController = AdvancedDrawerController();
+  
+  // Controlador de animação para o fade
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
 
   // Lista de pacotes com seus estados iniciais
   final Map<String, bool> _packages = {
@@ -111,10 +138,35 @@ class _HomeScreenState extends State<HomeScreen> {
     'flutter_zoom_drawer': false,
     'flutter_advanced_drawer': true,
     'getx_scaffold': false,
-    'native_scaffold': true,
+    'native_scaffold': false,
     'persistent_bottom_nav_bar': true,
     'convex_bottom_bar': false,
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+    
+    // Inicia a animação de fade
+    _fadeController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,113 +234,226 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      // Conteúdo principal usando Native Scaffold
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Flutter Gems'),
-          leading: IconButton(
-            onPressed: _handleMenuButtonPressed,
-            icon: ValueListenableBuilder<AdvancedDrawerValue>(
-              valueListenable: _advancedDrawerController,
-              builder: (_, value, __) {
-                return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
-                  child: Icon(
-                    value.visible ? Icons.clear : Icons.menu,
-                    key: ValueKey<bool>(value.visible),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        body: NativeScaffold(
-  title: 'Flutter Gems',
-  child: Column(
-    children: [
-      const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Text(
-          'Pacotes',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-      ),
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: ListView.builder(
-            itemCount: _packages.length,
-            itemBuilder: (context, index) {
-              final packageName = _packages.keys.elementAt(index);
-              final isEnabled = _packages[packageName] ?? false;
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                elevation: 2,
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  leading: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: isEnabled
-                          ? Colors.green.shade100
-                          : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+      // Conteúdo principal usando Scaffold padrão com animação de fade
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Flutter Gems'),
+            centerTitle: true,
+            backgroundColor: Colors.blue.shade600,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              onPressed: _handleMenuButtonPressed,
+              icon: ValueListenableBuilder<AdvancedDrawerValue>(
+                valueListenable: _advancedDrawerController,
+                builder: (_, value, __) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
                     child: Icon(
-                      Icons.extension,
-                      color: isEnabled
-                          ? Colors.green.shade600
-                          : Colors.grey.shade600,
+                      value.visible ? Icons.clear : Icons.menu,
+                      key: ValueKey<bool>(value.visible),
+                      color: Colors.white,
                     ),
-                  ),
-                  title: Text(
-                    packageName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                      color: isEnabled
-                          ? Colors.black87
-                          : Colors.grey.shade600,
-                    ),
-                  ),
-                  subtitle: Text(
-                    isEnabled ? 'Ativado' : 'Desativado',
-                    style: TextStyle(
-                      color: isEnabled
-                          ? Colors.green.shade600
-                          : Colors.grey.shade500,
-                      fontSize: 12,
-                    ),
-                  ),
-                  trailing: Switch(
-                    value: isEnabled,
-                    onChanged: (bool value) {
-                      setState(() {
-                        _packages[packageName] = value;
-                      });
-                    },
-                    activeColor: Colors.green.shade600,
-                    inactiveThumbColor: Colors.grey.shade400,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                  );
+                },
               ),
             ),
-          ],
+          ),
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.blue.shade600,
+                  Colors.blue.shade50,
+                ],
+                stops: const [0.0, 0.3],
+              ),
+            ),
+            child: Column(
+              children: [
+                // Cabeçalho com título
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Flutter Gems',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Gerencie seus pacotes Flutter',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.blue.shade100,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Lista de pacotes
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        // Título da seção
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.inventory_2,
+                                color: Colors.blue.shade600,
+                                size: 28,
+                              ),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Pacotes',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        // Lista scrollável de pacotes
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ListView.builder(
+                              itemCount: _packages.length,
+                              itemBuilder: (context, index) {
+                                final packageName = _packages.keys.elementAt(index);
+                                final isEnabled = _packages[packageName] ?? false;
+
+                                return OpenContainer(
+                                  closedElevation: 0,
+                                  openElevation: 0,
+                                  transitionType: ContainerTransitionType.fade,
+                                  transitionDuration: const Duration(milliseconds: 500),
+                                  closedBuilder: (BuildContext context, VoidCallback openContainer) {
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: 12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.shade200,
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ListTile(
+                                        onTap: openContainer,
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
+                                        leading: Container(
+                                          width: 48,
+                                          height: 48,
+                                          decoration: BoxDecoration(
+                                            color: isEnabled
+                                                ? Colors.green.shade100
+                                                : Colors.grey.shade100,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(
+                                            Icons.extension,
+                                            color: isEnabled
+                                                ? Colors.green.shade600
+                                                : Colors.grey.shade600,
+                                            size: 24,
+                                          ),
+                                        ),
+                                        title: Text(
+                                          packageName,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                            color: isEnabled
+                                                ? Colors.black87
+                                                : Colors.grey.shade600,
+                                          ),
+                                        ),
+                                        subtitle: Container(
+                                          margin: const EdgeInsets.only(top: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: isEnabled
+                                                ? Colors.green.shade50
+                                                : Colors.grey.shade50,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            isEnabled ? 'Ativado' : 'Desativado',
+                                            style: TextStyle(
+                                              color: isEnabled
+                                                  ? Colors.green.shade700
+                                                  : Colors.grey.shade600,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        trailing: Switch(
+                                          value: isEnabled,
+                                          onChanged: (bool value) {
+                                            setState(() {
+                                              _packages[packageName] = value;
+                                            });
+                                          },
+                                          activeColor: Colors.green.shade600,
+                                          inactiveThumbColor: Colors.grey.shade400,
+                                          activeTrackColor: Colors.green.shade200,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  openBuilder: (BuildContext context, VoidCallback closeContainer) {
+                                    return PackageDetailScreen(packageName: packageName);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-    ));
+    );
   }
 
   void _handleMenuButtonPressed() {
@@ -309,26 +474,59 @@ class PlaceholderScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.blue.shade600,
+        foregroundColor: Colors.white,
+        centerTitle: true,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              title == 'Favoritos' ? Icons.favorite : Icons.settings,
-              size: 100,
-              color: Colors.grey.shade400,
+      body: FadeTransition(
+        opacity: const AlwaysStoppedAnimation(1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.blue.shade50,
+                Colors.white,
+              ],
             ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    title == 'Favoritos' ? Icons.favorite : Icons.settings,
+                    size: 80,
+                    color: Colors.blue.shade400,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Esta seção estará disponível em breve',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -346,56 +544,88 @@ class PackageDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(packageName),
+        backgroundColor: Colors.blue.shade600,
+        foregroundColor: Colors.white,
       ),
       body: FadeTransition(
         opacity: const AlwaysStoppedAnimation(1.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.extension,
-                      size: 80,
-                      color: Colors.blue.shade600,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      packageName,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.blue.shade50,
+                Colors.white,
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.shade100,
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.extension,
+                          size: 60,
+                          color: Colors.blue.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        packageName,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Descrição',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                const SizedBox(height: 32),
+                const Text(
+                  'Descrição',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Este é o pacote $packageName. Aqui você pode ver mais detalhes sobre este pacote Flutter.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade700,
+                const SizedBox(height: 12),
+                Text(
+                  'Este é o pacote $packageName. Aqui você pode ver mais detalhes sobre este pacote Flutter e como ele pode ser usado em seus projetos.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade700,
+                    height: 1.5,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
